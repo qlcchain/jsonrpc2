@@ -23,6 +23,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"net/url"
@@ -119,7 +121,7 @@ func wsHandshakeValidator(allowedOrigins []string) func(*websocket.Config, *http
 		}
 	}
 
-	//log.Root.Debug(fmt.Sprintf("Allowed origin(s) for WS RPC interface %v", origins.ToSlice()))
+	log.Println(fmt.Sprintf("Allowed origin(s) for WS RPC interface %v", origins.ToSlice()))
 
 	f := func(cfg *websocket.Config, req *http.Request) error {
 		// Skip origin verification if no Origin header is present. The origin check
@@ -134,7 +136,7 @@ func wsHandshakeValidator(allowedOrigins []string) func(*websocket.Config, *http
 		if allowAllOrigins || origins.Contains(origin) {
 			return nil
 		}
-		//log.Root.Warn("Rejected WebSocket connection", "origin", origin)
+		log.Println("Rejected WebSocket connection", "origin", origin)
 		return errors.New("origin not allowed")
 	}
 

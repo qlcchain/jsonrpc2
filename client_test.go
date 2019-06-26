@@ -19,6 +19,7 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"net"
 	"net/http"
@@ -187,7 +188,7 @@ func testClientCancel(transport string, t *testing.T) {
 			sleepTime := maxContextCancelTimeout + 20*time.Millisecond
 			err := client.CallContext(ctx, nil, "test_sleep", sleepTime)
 			if err != nil {
-				log.Root.Debug(fmt.Sprint("got expected error:", err))
+				t.Log(fmt.Sprint("got expected error:", err))
 			} else {
 				t.Errorf("no error for call with %v wait time", timeout)
 			}
@@ -557,7 +558,7 @@ func (l *flakeyListener) Accept() (net.Conn, error) {
 	if err == nil {
 		timeout := time.Duration(rand.Int63n(int64(l.maxKillTimeout)))
 		time.AfterFunc(timeout, func() {
-			//logger.Debug(fmt.Sprintf("killing conn %v after %v", c.LocalAddr(), timeout))
+			log.Println(fmt.Sprintf("killing conn %v after %v", c.LocalAddr(), timeout))
 			c.Close()
 		})
 	}

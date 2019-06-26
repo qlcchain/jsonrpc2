@@ -25,7 +25,7 @@ import (
 func (s *Server) ServeListener(l net.Listener) error {
 	for {
 		conn, err := l.Accept()
-		if netutil.IsTemporaryError(err) {
+		if IsTemporaryError(err) {
 			//log.Warn("RPC accept error", "err", err)
 			continue
 		} else if err != nil {

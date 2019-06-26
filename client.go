@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -501,7 +502,7 @@ func (c *Client) reconnect(ctx context.Context) error {
 	}
 	newconn, err := c.reconnectFunc(ctx)
 	if err != nil {
-		//log.Root.Debug(fmt.Sprintf("reconnect failed: %v", err))
+		log.Println(fmt.Sprintf("reconnect failed: %v", err))
 		return err
 	}
 	select {
@@ -550,13 +551,13 @@ func (c *Client) dispatch(codec ServerCodec) {
 			}
 
 		case err := <-c.readErr:
-			conn.handler.log.Debug("RPC connection read error", "err", err)
+			conn.handler.log.Println("RPC connection read error", "err", err)
 			conn.close(err, lastOp)
 			reading = false
 
 		// Reconnect:
 		case newcodec := <-c.reconnected:
-			log.Root.Debug("RPC client reconnected", "reading", reading, "conn", newcodec.RemoteAddr())
+			log.Println("RPC client reconnected", "reading", reading, "conn", newcodec.RemoteAddr())
 			if reading {
 				// Wait for the previous read loop to exit. This is a rare case which
 				// happens if this loop isn't notified in time after the connection breaks.

@@ -19,6 +19,8 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -56,7 +58,7 @@ type handler struct {
 	rootCtx        context.Context                // canceled by close()
 	cancelRoot     func()                         // cancel function for rootCtx
 	conn           jsonWriter                     // where responses will be sent
-	//log            *zap.SugaredLogger
+	log            *log.Logger
 	allowSubscribe bool
 
 	subLock    sync.Mutex
@@ -80,7 +82,7 @@ func newHandler(connCtx context.Context, conn jsonWriter, idgen func() ID, reg *
 		cancelRoot:     cancelRoot,
 		allowSubscribe: true,
 		serverSubs:     make(map[ID]*Subscription),
-		//log:            log.NewLogger("handler"),
+		log:            log.New(os.Stdout, "", 0),
 	}
 	//if conn.RemoteAddr() != "" {
 	//	h.log = h.log.New("conn", conn.RemoteAddr())

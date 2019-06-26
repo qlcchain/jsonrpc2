@@ -17,8 +17,9 @@
 package rpc
 
 import (
+	"log"
 	"net"
-
+	"net/url"
 )
 
 // StartHTTPEndpoint starts the HTTP RPC endpoint, configured with cors/vhosts/modules
@@ -35,7 +36,7 @@ func StartHTTPEndpoint(endpoint string, apis []API, modules []string, cors []str
 			if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
 				return nil, nil, err
 			}
-			//log.Root.Debug("HTTP registered ", "namespace ", api.Namespace)
+			log.Println("HTTP registered ", "namespace ", api.Namespace)
 		}
 	}
 	// All APIs registered, start the HTTP listener
@@ -70,7 +71,7 @@ func StartWSEndpoint(endpoint string, apis []API, modules []string, wsOrigins []
 			if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
 				return nil, nil, err
 			}
-			//log.Root.Debug("WebSocket registered ", " service ", api.Service, " namespace ", api.Namespace)
+			log.Println("WebSocket registered ", " service ", api.Service, " namespace ", api.Namespace)
 		}
 	}
 	// All APIs registered, start the HTTP listener
@@ -100,7 +101,7 @@ func StartIPCEndpoint(ipcEndpoint string, apis []API) (net.Listener, *Server, er
 		if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
 			return nil, nil, err
 		}
-		//logger.Debug("IPC registered ", "namespace ", api.Namespace)
+		log.Println("IPC registered ", "namespace ", api.Namespace)
 	}
 	// All APIs registered, start the IPC listener.
 	listener, err := ipcListen(ipcEndpoint)
@@ -109,4 +110,12 @@ func StartIPCEndpoint(ipcEndpoint string, apis []API) (net.Listener, *Server, er
 	}
 	go handler.ServeListener(listener)
 	return listener, handler, nil
+}
+
+func scheme(endpoint string) (string, string, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return "", "", err
+	}
+	return u.Scheme, u.Host, nil
 }
