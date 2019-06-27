@@ -19,7 +19,6 @@ package rpc
 import (
 	"context"
 	"io"
-	"log"
 	"sync/atomic"
 
 	mapset "github.com/deckarep/golang-set"
@@ -120,7 +119,7 @@ func (s *Server) serveSingleRequest(ctx context.Context, codec ServerCodec) {
 // subscriptions.
 func (s *Server) Stop() {
 	if atomic.CompareAndSwapInt32(&s.run, 1, 0) {
-		log.Println("RPC server shutting down")
+		logger.Debug("RPC server shutting down")
 		s.codecs.Each(func(c interface{}) bool {
 			c.(ServerCodec).Close()
 			return true

@@ -19,7 +19,6 @@ package rpc
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
 	"net"
 	"net/http"
@@ -558,7 +557,7 @@ func (l *flakeyListener) Accept() (net.Conn, error) {
 	if err == nil {
 		timeout := time.Duration(rand.Int63n(int64(l.maxKillTimeout)))
 		time.AfterFunc(timeout, func() {
-			log.Println(fmt.Sprintf("killing conn %v after %v", c.LocalAddr(), timeout))
+			logger.Debugf("killing conn %v after %v", c.LocalAddr(), timeout)
 			c.Close()
 		})
 	}

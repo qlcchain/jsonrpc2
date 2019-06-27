@@ -26,12 +26,12 @@ func (s *Server) ServeListener(l net.Listener) error {
 	for {
 		conn, err := l.Accept()
 		if IsTemporaryError(err) {
-			//log.Warn("RPC accept error", "err", err)
+			logger.Warning("RPC accept error", "err", err)
 			continue
 		} else if err != nil {
 			return err
 		}
-		//log.Trace("Accepted RPC connection", "conn", conn.RemoteAddr())
+		logger.Info("Accepted RPC connection", "conn", conn.RemoteAddr())
 		go s.ServeCodec(NewJSONCodec(conn), OptionMethodInvocation|OptionSubscriptions)
 	}
 }

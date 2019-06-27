@@ -17,7 +17,6 @@
 package rpc
 
 import (
-	"log"
 	"net"
 	"net/url"
 )
@@ -36,7 +35,7 @@ func StartHTTPEndpoint(endpoint string, apis []API, modules []string, cors []str
 			if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
 				return nil, nil, err
 			}
-			log.Println("HTTP registered ", "namespace ", api.Namespace)
+			logger.Debug("HTTP registered ", "namespace ", api.Namespace)
 		}
 	}
 	// All APIs registered, start the HTTP listener
@@ -71,7 +70,7 @@ func StartWSEndpoint(endpoint string, apis []API, modules []string, wsOrigins []
 			if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
 				return nil, nil, err
 			}
-			log.Println("WebSocket registered ", " service ", api.Service, " namespace ", api.Namespace)
+			logger.Debug("WebSocket registered ", " service ", api.Service, " namespace ", api.Namespace)
 		}
 	}
 	// All APIs registered, start the HTTP listener
@@ -101,7 +100,7 @@ func StartIPCEndpoint(ipcEndpoint string, apis []API) (net.Listener, *Server, er
 		if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
 			return nil, nil, err
 		}
-		log.Println("IPC registered ", "namespace ", api.Namespace)
+		logger.Debug("IPC registered ", "namespace ", api.Namespace)
 	}
 	// All APIs registered, start the IPC listener.
 	listener, err := ipcListen(ipcEndpoint)
