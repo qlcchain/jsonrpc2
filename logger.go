@@ -5,6 +5,8 @@ import (
 	"os"
 )
 
+var IsDebug = false
+
 // Logger is implemented by any logging system that is used for standard logs.
 type Logger interface {
 	Errorf(string, ...interface{})
@@ -44,13 +46,19 @@ func (l *defaultLog) Infof(f string, v ...interface{}) {
 }
 
 func (l *defaultLog) Info(v ...interface{}) {
-	l.Println(v...)
+	if IsDebug {
+		l.Println(v...)
+	}
 }
 
 func (l *defaultLog) Debugf(f string, v ...interface{}) {
-	l.Printf("DEBUG: "+f+"\n", v...)
+	if IsDebug {
+		l.Printf("DEBUG: "+f+"\n", v...)
+	}
 }
 
 func (l *defaultLog) Debug(v ...interface{}) {
-	l.Println(v...)
+	if IsDebug {
+		l.Println(v...)
+	}
 }
