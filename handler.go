@@ -19,6 +19,8 @@ package rpc
 import (
 	"context"
 	"encoding/json"
+	"log"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -81,7 +83,7 @@ func newHandler(connCtx context.Context, conn jsonWriter, idgen func() ID, reg *
 		cancelRoot:     cancelRoot,
 		allowSubscribe: true,
 		serverSubs:     make(map[ID]*Subscription),
-		log:            &defaultLog{},
+		log:            &defaultLog{Logger: log.New(os.Stderr, "rpc ", log.LstdFlags)},
 	}
 	if conn.RemoteAddr() != "" {
 		//h.log = h.log.New("conn", conn.RemoteAddr())
