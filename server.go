@@ -18,6 +18,7 @@ package rpc
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"sync/atomic"
 
@@ -93,6 +94,7 @@ func (s *Server) ServeCodec(codec ServerCodec, options CodecOption) {
 func (s *Server) serveSingleRequest(ctx context.Context, codec ServerCodec) {
 	// Don't serve if server is stopped.
 	if atomic.LoadInt32(&s.run) == 0 {
+		fmt.Println("server is stopped")
 		return
 	}
 
