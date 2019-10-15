@@ -18,12 +18,11 @@ package rpc
 
 import (
 	"net"
-	"net/http"
 	"net/url"
 )
 
 // StartHTTPEndpoint starts the HTTP RPC endpoint, configured with cors/vhosts/modules
-func StartHTTPEndpoint(endpoint string, apis []API, modules []string, cors []string, vhosts []string, timeouts HTTPTimeouts) (net.Listener, *Server, *http.Server, error) {
+func StartHTTPEndpoint(endpoint string, apis []API, modules []string, cors []string, vhosts []string, timeouts HTTPTimeouts) (net.Listener, *Server, error) {
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
 	for _, module := range modules {
@@ -34,7 +33,7 @@ func StartHTTPEndpoint(endpoint string, apis []API, modules []string, cors []str
 	for _, api := range apis {
 		if whitelist[api.Namespace] || (len(whitelist) == 0 && api.Public) {
 			if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
-				return nil, nil, nil, err
+				return nil, nil, err
 			}
 			logger.Debug("HTTP registered ", "namespace ", api.Namespace)
 		}
@@ -46,23 +45,18 @@ func StartHTTPEndpoint(endpoint string, apis []API, modules []string, cors []str
 	)
 	network, address, err := scheme(endpoint)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 	if listener, err = net.Listen(network, address); err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
-	hServer := new(http.Server)
-	go func(hServer *http.Server) {
-		hServer = NewHTTPServer(cors, vhosts, timeouts, handler)
-		hServer.Serve(listener)
-	}(hServer)
-
-	return listener, handler, hServer, err
+	go NewHTTPServer(cors, vhosts, timeouts, handler).Serve(listener)
+	return listener, handler, err
 }
 
 // StartWSEndpoint starts a websocket endpoint
-func StartWSEndpoint(endpoint string, apis []API, modules []string, wsOrigins []string, exposeAll bool) (net.Listener, *Server, *http.Server, error) {
+func StartWSEndpoint(endpoint string, apis []API, modules []string, wsOrigins []string, exposeAll bool) (net.Listener, *Server, error) {
 
 	// Generate the whitelist based on the allowed modules
 	whitelist := make(map[string]bool)
@@ -74,7 +68,7 @@ func StartWSEndpoint(endpoint string, apis []API, modules []string, wsOrigins []
 	for _, api := range apis {
 		if exposeAll || whitelist[api.Namespace] || (len(whitelist) == 0 && api.Public) {
 			if err := handler.RegisterName(api.Namespace, api.Service); err != nil {
-				return nil, nil, nil, err
+				return nil, nil, err
 			}
 			logger.Debug("WebSocket registered ", " service ", api.Service, " namespace ", api.Namespace)
 		}
@@ -86,20 +80,15 @@ func StartWSEndpoint(endpoint string, apis []API, modules []string, wsOrigins []
 	)
 	network, address, err := scheme(endpoint)
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	if listener, err = net.Listen(network, address); err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
-	hServer := new(http.Server)
-	go func(hServer *http.Server) {
-		hServer = NewWSServer(wsOrigins, handler)
-		hServer.Serve(listener)
-	}(hServer)
-
-	return listener, handler, hServer, err
+	go NewWSServer(wsOrigins, handler).Serve(listener)
+	return listener, handler, err
 
 }
 

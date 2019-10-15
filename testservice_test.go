@@ -18,9 +18,7 @@ package rpc
 
 import (
 	"context"
-	"encoding/binary"
 	"errors"
-	"sync"
 	"time"
 )
 
@@ -34,21 +32,6 @@ func newTestServer() *Server {
 		panic(err)
 	}
 	return server
-}
-
-func sequentialIDGenerator() func() ID {
-	var (
-		mu      sync.Mutex
-		counter uint64
-	)
-	return func() ID {
-		mu.Lock()
-		defer mu.Unlock()
-		counter++
-		id := make([]byte, 8)
-		binary.BigEndian.PutUint64(id, counter)
-		return encodeID(id)
-	}
 }
 
 type testService struct{}

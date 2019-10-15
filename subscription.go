@@ -26,6 +26,7 @@ import (
 	"encoding/json"
 	"errors"
 	"math/rand"
+	"net/http"
 	"reflect"
 	"strings"
 	"sync"
@@ -324,4 +325,31 @@ func (sub *ClientSubscription) unmarshal(result json.RawMessage) (interface{}, e
 func (sub *ClientSubscription) requestUnsubscribe() error {
 	var result interface{}
 	return sub.client.Call(&result, sub.namespace+unsubscribeMethodSuffix, sub.subid)
+}
+
+func SubscriptionContext() context.Context {
+	ctx := context.Background()
+	handler := new(handler)
+	handler.idgen = sequentialIDGenerator()
+	r := new(http.Request)
+	w := new(http.ResponseWriter)
+	handler.conn = newHTTPServerConn(r, *w)
+	return context.WithValue(ctx, notifierKey{}, &Notifier{
+		h: handler,
+	})
+}
+
+func sequentialIDGenerator() func() ID {
+	var (
+		mu      sync.Mutex
+		counter uint64
+	)
+	return func() ID {
+		mu.Lock()
+		defer mu.Unlock()
+		counter++
+		id := make([]byte, 8)
+		binary.BigEndian.PutUint64(id, counter)
+		return encodeID(id)
+	}
 }
