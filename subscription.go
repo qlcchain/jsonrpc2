@@ -353,3 +353,30 @@ func sequentialIDGenerator() func() ID {
 		return encodeID(id)
 	}
 }
+
+func SubscriptionContextRandom() context.Context {
+	ctx := context.Background()
+	handler := new(handler)
+	handler.idgen = randomSequentialIDGenerator()
+	r := new(http.Request)
+	w := new(http.ResponseWriter)
+	handler.conn = newHTTPServerConn(r, *w)
+	return context.WithValue(ctx, notifierKey{}, &Notifier{
+		h: handler,
+	})
+}
+
+func randomSequentialIDGenerator() func() ID {
+	var (
+		mu      sync.Mutex
+		counter uint64
+	)
+	return func() ID {
+		mu.Lock()
+		defer mu.Unlock()
+		counter = rand.Uint64()
+		id := make([]byte, 8)
+		binary.BigEndian.PutUint64(id, counter)
+		return encodeID(id)
+	}
+}
