@@ -277,6 +277,7 @@ func (c *Client) CallContext(ctx context.Context, result interface{}, method str
 	if err != nil {
 		return err
 	}
+	logger.Debug("req: ", msg)
 	op := &requestOp{ids: []json.RawMessage{msg.ID}, resp: make(chan *jsonrpcMessage, 1)}
 
 	if c.isHTTP {
@@ -297,6 +298,11 @@ func (c *Client) CallContext(ctx context.Context, result interface{}, method str
 	case len(resp.Result) == 0:
 		return ErrNoResult
 	default:
+		if IsDebug {
+			if r, err := json.Marshal(resp.Result); err == nil {
+				logger.Debug("resp: ", string(r))
+			}
+		}
 		return json.Unmarshal(resp.Result, &result)
 	}
 }
